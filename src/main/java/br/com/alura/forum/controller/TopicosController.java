@@ -4,16 +4,19 @@ import br.com.alura.forum.controller.dto.TopicoBigDto;
 import br.com.alura.forum.controller.dto.TopicoDto;
 import br.com.alura.forum.controller.dto.TopicoForm;
 import br.com.alura.forum.controller.dto.TopicoUpdateForm;
+import br.com.alura.forum.model.Topico;
 import br.com.alura.forum.repository.CursoRepository;
 import br.com.alura.forum.repository.TopicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import javax.transaction.Transactional;
 import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping(value = "/topicos")
@@ -26,17 +29,24 @@ public class TopicosController {
     private CursoRepository cursoRepository;
 
     @GetMapping
-    public List list(String nomeCurso){
-        List topicos;
+    public Page list(
+            @RequestParam(required = false) String nomeCurso,
+            @RequestParam int page,
+            @RequestParam int size
+    ){
+        Pageable paginacao = PageRequest.of(page,size);
+        Page<Topico> topicos;
         System.out.println(nomeCurso);
-        if (nomeCurso != null) topicos = repository.findByCursoNome(nomeCurso);
-        else topicos = repository.findAll();
+        if (nomeCurso != null) topicos = repository.findByCursoNome(nomeCurso, paginacao);
+        else topicos = repository.findAll(paginacao);
         return TopicoDto.convert(topicos);
     }
 
     @GetMapping("/{id}")
-    public TopicoBigDto details(@PathVariable Long id){
-        return new TopicoBigDto(repository.findById(id).get());
+    public ResponseEntity<TopicoBigDto> details(@PathVariable Long id){
+        var dto = new TopicoBigDto(repository.findById(id).get());
+        if (dto != null) return ResponseEntity.ok(dto);
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping
