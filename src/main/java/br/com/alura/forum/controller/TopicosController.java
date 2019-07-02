@@ -8,10 +8,13 @@ import br.com.alura.forum.model.Topico;
 import br.com.alura.forum.repository.CursoRepository;
 import br.com.alura.forum.repository.TopicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -33,14 +36,12 @@ public class TopicosController {
         this.cursoRepository = cursoRepository;
     }
 
+    @Cacheable(value = "listaTopicos")
     @GetMapping
     public Page list(
             @RequestParam(required = false) String nomeCurso,
-            @RequestParam int page,
-            @RequestParam int size,
-            @RequestParam String sortBy
+            @PageableDefault(sort = "id", direction = Sort.Direction.ASC) Pageable paginacao
     ){
-        Pageable paginacao = PageRequest.of(page,size, Sort.Direction.DESC, sortBy);
         Page<Topico> topicos;
         System.out.println(nomeCurso);
         if (nomeCurso != null) topicos = repository.findByCursoNome(nomeCurso, paginacao);
