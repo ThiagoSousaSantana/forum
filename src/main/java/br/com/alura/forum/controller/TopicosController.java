@@ -8,10 +8,9 @@ import br.com.alura.forum.model.Topico;
 import br.com.alura.forum.repository.CursoRepository;
 import br.com.alura.forum.repository.TopicoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -58,6 +57,7 @@ public class TopicosController {
     }
 
     @PostMapping
+    @CacheEvict(value = "listaTopicos", allEntries = true)
     public ResponseEntity<TopicoDto> insert(@RequestBody @Valid TopicoForm form,
                                             UriComponentsBuilder uriBuilder){
         var topico = form.convert(cursoRepository);
@@ -69,12 +69,14 @@ public class TopicosController {
 
     @PutMapping("/{id}")
     @Transactional
+    @CacheEvict(value = "listaTopicos", allEntries = true)
     public ResponseEntity<TopicoDto> update(@PathVariable Long id, @RequestBody @Valid TopicoUpdateForm form){
         var topico = form.update(id, repository);
         return ResponseEntity.ok(new TopicoDto(topico));
     }
 
     @DeleteMapping("/{id}")
+    @CacheEvict(value = "listaTopicos", allEntries = true)
     public ResponseEntity<?> delete(@PathVariable Long id){
         repository.deleteById(id);
         return ResponseEntity.ok().build();
