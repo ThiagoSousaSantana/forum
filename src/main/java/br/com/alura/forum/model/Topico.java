@@ -1,13 +1,16 @@
 package br.com.alura.forum.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 
 @Entity
-public class Topico {
+public class Topico implements Serializable {
 
 	@Id @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -20,6 +23,7 @@ public class Topico {
 	private Usuario autor;
 	@ManyToOne
 	private Curso curso;
+	@JsonManagedReference
 	@OneToMany(mappedBy = "topico")
 	private List<Resposta> respostas = new ArrayList<>();
 

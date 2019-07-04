@@ -1,14 +1,18 @@
 package br.com.alura.forum.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
-public class Resposta {
+public class Resposta implements Serializable {
 
 	@Id	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String mensagem;
+	@JsonBackReference
 	@ManyToOne
 	private Topico topico;
 	private LocalDateTime dataCriacao = LocalDateTime.now();
