@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @EnableWebMvc
@@ -17,10 +18,12 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
 
     private final AutenticacaoService autenticacaoService;
+    private final TokenService tokenService;
 
     @Autowired
-    public SecurityConfigurations(AutenticacaoService autenticacaoService) {
+    public SecurityConfigurations(AutenticacaoService autenticacaoService, TokenService tokenService) {
         this.autenticacaoService = autenticacaoService;
+        this.tokenService = tokenService;
     }
 
     @Override
@@ -31,7 +34,8 @@ public class SecurityConfigurations extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.POST, "/auth").permitAll()
                 .anyRequest().authenticated()
                 .and().csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().addFilterBefore(new AutenticacaoFilter(tokenService), UsernamePasswordAuthenticationFilter.class);
 
     }
 
